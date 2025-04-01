@@ -1,25 +1,32 @@
 from flask import Flask, request, jsonify
-import requests
+import yt_dlp
 
 app = Flask(__name__)
 
 @app.route('/convert', methods=['POST'])
 def convert():
     try:
-        # Pega a URL do vídeo enviada pelo seu bot
         video_url = request.json.get('url')
-        
-        # Usa a API do Piped (alternativa ao YouTube)
-        response = requests.get(
-            f"https://pipedapi.kavin.rocks/streams/{video_url.split('v=')[1].split('&')[0]}"
-        )
-        
-        audio_url = response.json()['audioStreams'][0]['url']
-        
-        return jsonify({
-            "audioUrl": audio_url,  # ← Seu bot já espera esse formato!
-            "quality": "128kbps"    # Opcional
-        })
+        if not video_url:
+            return jsonify({"error": "URL não fornecida"}), 400
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': True
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+            for fmt in info['formats']:
+                if fmt.get('acodec') != 'none' and fmt.get('vcodec') == 'none':
+                    return jsonify({
+                        "audioUrl": fmt['url'],
+                        "filename": f"{info['title']}.mp3"
+                    })
+
+        return jsonify({"error": "Nenhum formato de áudio encontrado"}), 404
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
