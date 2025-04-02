@@ -5,9 +5,7 @@ app = Flask(__name__)
 
 # Lista de servidores Piped alternativos
 PIPED_SERVERS = [
-    "https://pipedapi.kavin.rocks",
-    "https://pipedapi.tokhmi.xyz",
-    "https://pipedapi.in.projectsegfau.lt"
+    "https://pipedapi.kavin.rocks"
 ]
 
 def get_audio_url(video_id):
