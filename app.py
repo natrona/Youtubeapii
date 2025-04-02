@@ -7,19 +7,23 @@ app = Flask(__name__)
 PIPED_SERVERS = [
     "https://pipedapi.kavin.rocks",
     "https://pipedapi.tokhmi.xyz",
-    "https://pipedapi.nobulart.com"
+    "https://pipedapi.in.projectsegfau.lt"
 ]
 
 def get_audio_url(video_id):
-    """Tenta buscar o áudio do vídeo em servidores Piped alternativos"""
+    """Tenta buscar o áudio do vídeo em servidores Piped ativos"""
     for server in PIPED_SERVERS:
-        piped_api_url = f"{server}/streams/{video_id}"
-        response = requests.get(piped_api_url)
+        try:
+            piped_api_url = f"{server}/streams/{video_id}"
+            response = requests.get(piped_api_url, timeout=5)  # Timeout de 5 segundos
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "audioStreams" in data and data["audioStreams"]:
+                    return data["audioStreams"][0]["url"]  # Retorna o primeiro áudio disponível
         
-        if response.status_code == 200:
-            data = response.json()
-            if "audioStreams" in data and data["audioStreams"]:
-                return data["audioStreams"][0]["url"]  # Retorna o primeiro áudio disponível
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao acessar {server}: {e}")
     
     return None  # Retorna None se todos os servidores falharem
 
