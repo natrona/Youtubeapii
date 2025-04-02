@@ -3,7 +3,7 @@ import yt_dlp
 
 app = Flask(__name__)
 
-@app.route('/convert', methods=['POST'])
+@app.route('/convert', methods=['GET', 'POST'])
 def convert():
     try:
         video_url = request.json.get('url')
