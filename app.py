@@ -15,7 +15,7 @@ def get_audio_url(video_id):
     for server in PIPED_SERVERS:
         try:
             piped_api_url = f"{server}/streams/{video_id}"
-            response = requests.get(piped_api_url, timeout=5)  # Timeout de 5 segundos
+            response = requests.get(piped_api_url, timeout=50)  # Timeout de 5 segundos
             
             if response.status_code == 200:
                 data = response.json()
